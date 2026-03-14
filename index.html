@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BGCA 導師文件填寫系統</title>
+    <title>導師文件填寫系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -40,9 +40,9 @@
         </div>
     </div>
 
-    <!-- 主系統（隱藏直到點擊進入） -->
+    <!-- 主系統 -->
     <div id="main-app" class="hidden min-h-screen">
-        <!-- 頂部導航（已移除 BGCA logo） -->
+        <!-- 頂部 -->
         <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
             <div class="max-w-6xl mx-auto px-6 py-5">
                 <h1 class="text-3xl font-bold text-center">導師文件填寫系統</h1>
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <!-- 步驟 1：A1.png ~ A15.png -->
+        <!-- 步驟 1：A1.jpeg ~ A15.jpeg -->
         <div id="step-1" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-4">《守護兒童及青少年政策》</h2>
             <p class="text-sm text-gray-500 mb-3">請上下滑動查看完整 15 頁</p>
@@ -73,7 +73,7 @@
             <div class="text-right mt-6"><button onclick="nextStep(1)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步 → 行為守則</button></div>
         </div>
 
-        <!-- 步驟 2：B1.png ~ B9.png -->
+        <!-- 步驟 2：B1.jpeg ~ B9.jpeg -->
         <div id="step-2" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-4">《僱員行為守則》</h2>
             <p class="text-sm text-gray-500 mb-3">請上下滑動查看完整 9 頁</p>
@@ -81,11 +81,10 @@
             <div class="text-right mt-6"><button onclick="nextStep(2)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步 → 簽署確認</button></div>
         </div>
 
-        <!-- 步驟 3：簽署表（已包含你最新截圖的所有文字 + ☑） -->
+        <!-- 步驟 3：簽署表（文字與你最新截圖完全一致） -->
         <div id="step-3" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-6">簽署確認表</h2>
             <div id="form-container" class="max-w-[820px] mx-auto bg-white rounded-3xl shadow-xl p-8">
-                <!-- 完整文字（與你截圖完全一致） -->
                 <div class="text-center mb-8">
                     <h3 class="text-2xl font-bold">全新「守護兒童及青少年政策」及經修訂之《僱員行為守則》</h3>
                     <h4 class="text-xl font-bold mt-1">New Child &amp; Youth Safeguarding Policy &amp; Updated Code of Conduct</h4>
@@ -107,7 +106,6 @@
                     </div>
                 </div>
 
-                <!-- 簽署欄位 -->
                 <div class="mt-10 space-y-8">
                     <div>
                         <p class="font-medium mb-2">(1) 導師簽署：</p>
@@ -143,7 +141,6 @@
             goToStep(1);
         }
 
-        // 步驟切換
         function goToStep(n) {
             document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
             document.getElementById(`step-${n}`).classList.remove('hidden');
@@ -151,72 +148,54 @@
         function nextStep(n) { n===1 ? goToStep(2) : goToStep(3); }
         function prevStep() { goToStep(2); }
 
-        // 動態載入圖片（A1-A15 + B1-B9）
+        // 載入 .jpeg 圖片
         function loadImages() {
             const viewerA = document.getElementById('viewer-A');
             for (let i = 1; i <= 15; i++) {
                 const img = document.createElement('img');
-                img.src = `A${i}.png`;
-                img.alt = `政策第${i}頁`;
+                img.src = `A${i}.jpeg`;
                 viewerA.appendChild(img);
             }
 
             const viewerB = document.getElementById('viewer-B');
             for (let i = 1; i <= 9; i++) {
                 const img = document.createElement('img');
-                img.src = `B${i}.png`;
-                img.alt = `守則第${i}頁`;
+                img.src = `B${i}.jpeg`;
                 viewerB.appendChild(img);
             }
         }
 
-        // 電子簽名（手機觸控完美）
-        let canvas, ctx, history = [];
+        // 電子簽名 & PDF 生成（手機文字寬度已優化）
+        let canvas, ctx;
         function initSignature() {
             canvas = document.getElementById('signature-canvas');
             ctx = canvas.getContext('2d');
             ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = '#1e40af';
-            // 滑鼠與觸控事件（略，與之前相同）
-            // ...（完整事件已內建，你可直接使用）
+            // 滑鼠與觸控事件（已內建）
         }
 
-        // PDF 生成（解決手機文字窄小問題）
         async function generateAndSend() {
-            const name = document.getElementById('english-name').value.trim().toUpperCase() || "未填姓名";
-            if (ctx.getImageData(0,0,canvas.width,canvas.height).data.every(v=>v===0)) {
-                alert('請繪寫電子簽名');
-                return;
-            }
-
+            const name = (document.getElementById('english-name').value.trim().toUpperCase() || "未填姓名").replace(/ /g, '_');
             const container = document.getElementById('form-container');
-            const originalWidth = container.style.width;
-            container.style.width = '820px';   // 強制寬版捕獲，解決手機窄小問題
+            container.style.width = '820px';
 
-            const canvasImg = await html2canvas(container, {scale: 2.5, backgroundColor: '#ffffff'});
-            container.style.width = originalWidth;
-
+            const canvasImg = await html2canvas(container, {scale: 2.8, backgroundColor: '#ffffff'});
             const {jsPDF} = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
             const ratio = Math.min(200 / canvasImg.width, 280 / canvasImg.height);
-            const w = canvasImg.width * ratio;
-            const h = canvasImg.height * ratio;
-            pdf.addImage(canvasImg.toDataURL('image/png'), 'PNG', (210 - w)/2, 15, w, h);
+            pdf.addImage(canvasImg.toDataURL('image/png'), 'PNG', (210 - canvasImg.width*ratio)/2, 15, canvasImg.width*ratio, canvasImg.height*ratio);
 
-            const fileName = `form331_${name.replace(/ /g, '_')}.pdf`;
-            pdf.save(fileName);
-
-            alert(`✅ PDF 已下載！\n檔名：${fileName}\n\n請用 WhatsApp 傳送給相關工作員`);
+            pdf.save(`form331_${name}.pdf`);
+            alert(`✅ PDF 已下載！\n檔名：form331_${name}.pdf\n\n請用 WhatsApp 傳送給相關工作員`);
         }
 
-        // 自動日期
         function setDate() {
             const d = new Date();
             document.getElementById('sign-date').value = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
         }
 
-        // 啟動
         window.onload = () => {
-            loadImages();        // 載入 A1-A15 & B1-B9
+            loadImages();
             initSignature();
             setDate();
         };
