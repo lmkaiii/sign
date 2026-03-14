@@ -4,185 +4,217 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BGCA 導師文件填寫系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
-        
-        body { 
-            font-family: 'Noto Sans TC', system-ui, sans-serif; 
-            margin: 0;
-            background: #f8fafc;
-        }
+        body { font-family: 'Noto Sans TC', system-ui, sans-serif; }
+        .step { transition: all 0.3s; }
         .hidden { display: none !important; }
-        
-        /* 自訂樣式（取代 Tailwind） */
-        .btn-blue {
-            background: #2563eb;
-            color: white;
-            padding: 16px 40px;
-            border-radius: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
+        .form-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        .btn-blue:hover { background: #1e40af; }
-        
-        .card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        .form-container img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
-        
         .overlay {
             position: absolute;
             background: rgba(255,255,255,0.95);
-            border: 2px solid #2563eb;
-            padding: 8px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid #3b82f6;
+            padding: 4px;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        
         #signature-canvas {
-            border: 2px dashed #2563eb;
+            border: 2px dashed #3b82f6;
             background: white;
             cursor: crosshair;
             touch-action: none;
         }
-        
         .pdf-viewer {
             width: 100%;
             height: 75vh;
             border: 1px solid #e5e7eb;
-            border-radius: 16px;
             background: #f8fafc;
-        }
-        
-        .step-dot {
-            width: 28px; height: 28px;
-            background: #dbeafe;
-            color: #2563eb;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
         }
     </style>
 </head>
-<body>
-
-    <!-- 密碼畫面 -->
+<body class="bg-gray-50">
+    <!-- 密碼頁面 -->
     <div id="password-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700">
-        <div class="card p-10 max-w-md w-full mx-4 text-center">
-            <h1 class="text-3xl font-bold text-gray-800">香港小童群益會</h1>
-            <p class="text-blue-600 font-medium mt-2">導師文件確認系統</p>
-            
-            <div class="mt-8 space-y-6">
-                <input id="password-input" type="password" 
-                       class="w-full px-5 py-4 border border-gray-300 rounded-2xl text-lg focus:outline-none focus:border-blue-500"
-                       placeholder="輸入密碼">
+        <div class="bg-white rounded-2xl shadow-2xl p-10 max-w-md w-full mx-4">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">香港小童群益會</h1>
+                <p class="text-blue-600 font-medium mt-2">導師文件確認系統</p>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">輸入密碼</label>
+                    <input id="password-input" 
+                           type="password" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 text-lg"
+                           placeholder="bgcafanling">
+                </div>
                 <button onclick="checkPassword()" 
-                        class="btn-blue w-full text-lg">進入系統</button>
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 rounded-xl transition-all text-lg">
+                    進入系統
+                </button>
+                <p class="text-xs text-gray-500 text-center">僅供內部導師使用 • 密碼：bgcafanling</p>
             </div>
         </div>
     </div>
 
     <!-- 主系統 -->
-    <div id="main-app" class="hidden min-h-screen">
+    <div id="main-app" class="hidden min-h-screen bg-gray-50">
         <!-- 頂部導航 -->
-        <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <nav class="bg-white shadow-sm border-b">
             <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl font-bold text-xl">BGCA</div>
+                    <div class="bg-blue-600 text-white px-4 py-1.5 rounded-xl font-bold text-lg">BGCA</div>
                     <div>
-                        <h1 class="text-2xl font-bold">導師文件填寫系統</h1>
+                        <h1 class="text-xl font-bold text-gray-800">導師文件填寫系統</h1>
+                        <p class="text-xs text-gray-500">守護兒童及青少年政策 + 僱員行為守則確認</p>
                     </div>
                 </div>
-                <div class="flex gap-8">
-                    <div onclick="goToStep(1)" id="step-dot-1" class="cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
-                        <div class="step-dot">1</div> 政策文件
+                <div class="flex items-center gap-8 text-sm">
+                    <div onclick="goToStep(1)" id="step-dot-1"
+                         class="flex items-center gap-2 cursor-pointer hover:text-blue-600">
+                        <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">1</div>
+                        <span class="font-medium">政策文件</span>
                     </div>
-                    <div onclick="goToStep(2)" id="step-dot-2" class="cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
-                        <div class="step-dot">2</div> 行為守則
+                    <div onclick="goToStep(2)" id="step-dot-2"
+                         class="flex items-center gap-2 cursor-pointer hover:text-blue-600">
+                        <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">2</div>
+                        <span class="font-medium">行為守則</span>
                     </div>
-                    <div onclick="goToStep(3)" id="step-dot-3" class="cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
-                        <div class="step-dot">3</div> 簽署確認
+                    <div onclick="goToStep(3)" id="step-dot-3"
+                         class="flex items-center gap-2 cursor-pointer hover:text-blue-600">
+                        <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">3</div>
+                        <span class="font-medium">簽署確認</span>
                     </div>
                 </div>
-                <button onclick="logout()" class="text-red-500 hover:text-red-600">登出</button>
+                <button onclick="logout()" 
+                        class="text-sm text-gray-500 hover:text-red-600 flex items-center gap-1">
+                    登出
+                </button>
             </div>
         </nav>
 
-        <!-- 步驟 1 -->
-        <div id="step-1" class="max-w-6xl mx-auto px-6 py-8">
-            <h2 class="text-3xl font-bold flex items-center gap-4 mb-6">
-                <span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl">1</span>
-                《守護兒童及青少年政策》 (1.pdf)
-            </h2>
-            <iframe src="1.pdf" class="pdf-viewer"></iframe>
-            <div class="text-right mt-8">
-                <button onclick="nextStep(1)" class="btn-blue">下一步 → 行為守則</button>
+        <!-- 步驟 1：1.pdf -->
+        <div id="step-1" class="step max-w-6xl mx-auto px-6 py-8">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <span class="bg-blue-600 text-white w-8 h-8 rounded-xl flex items-center justify-center text-lg">1</span>
+                    《守護兒童及青少年政策》 (1.pdf)
+                </h2>
+                <p class="text-gray-500 mt-1">請仔細閱讀完整文件</p>
+            </div>
+            <iframe src="1.pdf" class="pdf-viewer rounded-2xl"></iframe>
+            <div class="flex justify-end mt-8">
+                <button onclick="nextStep(1)" 
+                        class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl flex items-center gap-3 transition-all">
+                    下一步 → 行為守則
+                </button>
             </div>
         </div>
 
-        <!-- 步驟 2 -->
-        <div id="step-2" class="max-w-6xl mx-auto px-6 py-8 hidden">
-            <h2 class="text-3xl font-bold flex items-center gap-4 mb-6">
-                <span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl">2</span>
-                《僱員行為守則》 (2.pdf)
-            </h2>
-            <iframe src="2.pdf" class="pdf-viewer"></iframe>
-            <div class="text-right mt-8">
-                <button onclick="nextStep(2)" class="btn-blue">下一步 → 簽署確認</button>
+        <!-- 步驟 2：2.pdf -->
+        <div id="step-2" class="step max-w-6xl mx-auto px-6 py-8 hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <span class="bg-blue-600 text-white w-8 h-8 rounded-xl flex items-center justify-center text-lg">2</span>
+                    《僱員行為守則》 (2.pdf)
+                </h2>
+                <p class="text-gray-500 mt-1">請仔細閱讀完整文件</p>
+            </div>
+            <iframe src="2.pdf" class="pdf-viewer rounded-2xl"></iframe>
+            <div class="flex justify-end mt-8">
+                <button onclick="nextStep(2)" 
+                        class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl flex items-center gap-3 transition-all">
+                    下一步 → 簽署確認
+                </button>
             </div>
         </div>
 
-        <!-- 步驟 3：簽署 -->
-        <div id="step-3" class="max-w-6xl mx-auto px-6 py-8 hidden">
-            <h2 class="text-3xl font-bold flex items-center gap-4 mb-6">
-                <span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl">3</span>
-                簽署確認表 (image004.png)
-            </h2>
+        <!-- 步驟 3：簽署頁面 -->
+        <div id="step-3" class="step max-w-6xl mx-auto px-6 py-8 hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <span class="bg-blue-600 text-white w-8 h-8 rounded-xl flex items-center justify-center text-lg">3</span>
+                    簽署確認表 (image004.png)
+                </h2>
+                <p class="text-gray-500">請在圖片空白位置填寫英文姓名、電子簽名及日期，然後提交</p>
+            </div>
 
-            <div id="form-container" class="relative max-w-[820px] mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl">
-                <img id="form-image" src="image004.png" alt="確認表格" class="w-full">
+            <!-- 表單容器 -->
+            <div id="form-container" class="form-container mx-auto">
+                <img id="form-image" src="image004.png" alt="確認表格" class="w-full rounded-t-2xl">
                 
-                <!-- 英文姓名 -->
+                <!-- 英文姓名 (可自行調整位置) -->
                 <div class="overlay" style="top: 68%; left: 12%; width: 38%;">
-                    <input id="english-name" type="text" placeholder="English Name (e.g. John Chan)"
-                           class="w-full px-5 py-4 text-lg border-0 focus:outline-none font-medium">
+                    <input id="english-name" 
+                           type="text" 
+                           placeholder="English Name (e.g. John Chan)"
+                           class="w-full px-4 py-3 text-lg border-0 focus:outline-none font-medium">
                 </div>
-                
-                <!-- 日期 -->
+
+                <!-- 簽署日期 (自動) -->
                 <div class="overlay" style="top: 68%; left: 58%; width: 28%;">
-                    <input id="sign-date" type="text" readonly class="w-full px-5 py-4 text-lg border-0 bg-transparent text-center font-medium">
+                    <input id="sign-date" 
+                           type="text" 
+                           readonly
+                           class="w-full px-4 py-3 text-lg border-0 bg-transparent font-medium text-center">
                 </div>
-                
-                <!-- 電子簽名 -->
-                <div class="overlay" style="top: 78%; left: 12%; width: 48%; padding: 16px;">
-                    <p class="text-sm text-gray-600 mb-3">電子簽名（滑鼠或手指繪寫）</p>
-                    <canvas id="signature-canvas" width="380" height="140" class="rounded-2xl"></canvas>
-                    <div class="flex gap-3 mt-4">
-                        <button onclick="clearSignature()" class="flex-1 bg-gray-200 py-3 rounded-2xl text-sm">清除簽名</button>
-                        <button onclick="undoSignature()" class="flex-1 bg-gray-200 py-3 rounded-2xl text-sm">上一步</button>
+
+                <!-- 電子簽名框 (可自行調整位置與大小) -->
+                <div class="overlay" style="top: 78%; left: 12%; width: 48%; padding: 12px; background: white;">
+                    <p class="text-xs text-gray-500 mb-2 font-medium">電子簽名 (請用滑鼠或手指繪寫)</p>
+                    <canvas id="signature-canvas" width="380" height="140" class="rounded-xl"></canvas>
+                    <div class="flex gap-3 mt-3">
+                        <button onclick="clearSignature()" 
+                                class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-xl text-sm font-medium">清除簽名</button>
+                        <button onclick="undoSignature()" 
+                                class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-xl text-sm font-medium">上一步</button>
                     </div>
                 </div>
             </div>
 
-            <div class="flex justify-center gap-6 mt-12">
-                <button onclick="prevStep(3)" class="px-10 py-4 border border-gray-300 rounded-2xl">← 上一步</button>
+            <div class="flex justify-center gap-4 mt-12">
+                <button onclick="prevStep(3)" 
+                        class="px-8 py-4 border border-gray-300 rounded-2xl font-medium">
+                    ← 上一步
+                </button>
                 <button onclick="generatePDF()" 
-                        class="px-14 py-4 bg-green-600 hover:bg-green-700 text-white text-lg rounded-2xl flex items-center gap-3">
-                    提交並生成 PDF
+                        class="px-12 py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-2xl flex items-center gap-3 text-lg">
+                    <span>提交並生成 PDF</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13v6m-3-3l-3 3m0-6l-3-3" />
+                    </svg>
                 </button>
             </div>
+            
+            <p class="text-center text-xs text-gray-400 mt-6">
+                2026 年 1 月 15 日或之前完成 • 生成的 PDF 會自動下載
+            </p>
         </div>
     </div>
 
     <script>
-        // 密碼
+        // Tailwind 初始化
+        function initTailwind() {
+            // 已透過 CDN 引入
+        }
+
+        // 密碼驗證
         function checkPassword() {
-            if (document.getElementById('password-input').value === 'bgcafanling') {
+            const input = document.getElementById('password-input').value.trim();
+            if (input === 'bgcafanling') {
                 document.getElementById('password-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 goToStep(1);
@@ -192,65 +224,214 @@
         }
 
         // 步驟切換
-        function goToStep(n) {
-            document.querySelectorAll('#step-1, #step-2, #step-3').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`step-${n}`).classList.remove('hidden');
+        let currentStep = 1;
+        function goToStep(step) {
+            currentStep = step;
+            document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            
+            // 更新進度點樣式
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById(`step-dot-${i}`);
+                if (i < currentStep) {
+                    dot.classList.add('text-blue-600');
+                } else if (i === currentStep) {
+                    dot.classList.add('text-blue-600', 'font-bold');
+                }
+            }
         }
-        function nextStep(n) { n === 1 ? goToStep(2) : goToStep(3); }
-        function prevStep() { goToStep(2); }
-        function logout() { if(confirm('確定登出？')) location.reload(); }
 
-        // 電子簽名
-        let canvas, ctx, isDrawing = false, lastX, lastY, history = [];
-        function initSignature() {
+        function nextStep(from) {
+            if (from === 1) goToStep(2);
+            if (from === 2) goToStep(3);
+        }
+
+        function prevStep(from) {
+            if (from === 3) goToStep(2);
+        }
+
+        // 登出
+        function logout() {
+            if (confirm('確定要登出嗎？')) {
+                location.reload();
+            }
+        }
+
+        // ==================== 電子簽名功能 ====================
+        let canvas, ctx, isDrawing = false, lastX = 0, lastY = 0;
+        let signatureHistory = [];
+
+        function initSignaturePad() {
             canvas = document.getElementById('signature-canvas');
             ctx = canvas.getContext('2d');
-            ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#1e40af';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#1e40af';
 
-            canvas.addEventListener('mousedown', e => { isDrawing=true; lastX=e.offsetX; lastY=e.offsetY; history.push(ctx.getImageData(0,0,canvas.width,canvas.height)); });
-            canvas.addEventListener('mousemove', e => {
-                if(!isDrawing) return;
-                ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke();
-                lastX = e.offsetX; lastY = e.offsetY;
-            });
-            canvas.addEventListener('mouseup', () => { isDrawing=false; history.push(ctx.getImageData(0,0,canvas.width,canvas.height)); });
-            
-            // 觸控支援
-            canvas.addEventListener('touchstart', e=>{ e.preventDefault(); isDrawing=true; const r=canvas.getBoundingClientRect(); lastX=e.touches[0].clientX-r.left; lastY=e.touches[0].clientY-r.top; });
-            canvas.addEventListener('touchmove', e=>{ e.preventDefault(); if(!isDrawing) return; const r=canvas.getBoundingClientRect(); const x=e.touches[0].clientX-r.left; const y=e.touches[0].clientY-r.top; ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(x,y); ctx.stroke(); lastX=x; lastY=y; });
+            // 滑鼠事件
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // 觸控事件 (手機/平板)
+            canvas.addEventListener('touchstart', handleTouchStart);
+            canvas.addEventListener('touchmove', handleTouchMove);
+            canvas.addEventListener('touchend', stopDrawing);
         }
-        function clearSignature(){ ctx.clearRect(0,0,canvas.width,canvas.height); history=[]; }
-        function undoSignature(){ if(history.length>1){ history.pop(); ctx.putImageData(history[history.length-1],0,0); } }
 
-        // PDF 生成
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+            signatureHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            lastX = x;
+            lastY = y;
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                signatureHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            }
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            lastX = touch.clientX - rect.left;
+            lastY = touch.clientY - rect.top;
+            signatureHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            lastX = x;
+            lastY = y;
+        }
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            signatureHistory = [];
+        }
+
+        function undoSignature() {
+            if (signatureHistory.length > 1) {
+                signatureHistory.pop();
+                ctx.putImageData(signatureHistory[signatureHistory.length - 1], 0, 0);
+            } else if (signatureHistory.length === 1) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                signatureHistory = [];
+            }
+        }
+
+        // ==================== PDF 生成 ====================
         async function generatePDF() {
-            const name = document.getElementById('english-name').value.trim();
-            if(!name){ alert('請填寫英文姓名'); return; }
-            if(ctx.getImageData(0,0,canvas.width,canvas.height).data.every(v=>v===0)){ alert('請繪寫電子簽名'); return; }
+            const nameInput = document.getElementById('english-name').value.trim();
+            const dateInput = document.getElementById('sign-date').value;
+
+            if (!nameInput) {
+                alert('請填寫英文姓名');
+                return;
+            }
+            if (!ctx || ctx.getImageData(0,0,canvas.width,canvas.height).data.every(pixel => pixel === 0)) {
+                alert('請繪寫電子簽名');
+                return;
+            }
 
             const container = document.getElementById('form-container');
-            const canvasImg = await html2canvas(container, {scale:2});
-            const imgData = canvasImg.toDataURL('image/png');
-
-            const {jsPDF} = window.jspdf;
-            const pdf = new jsPDF('portrait','mm','a4');
-            const ratio = Math.min(210/canvasImg.width, 297/canvasImg.height);
-            pdf.addImage(imgData, 'PNG', (210 - canvasImg.width*ratio)/2, (297 - canvasImg.height*ratio)/2, canvasImg.width*ratio, canvasImg.height*ratio);
             
-            pdf.save(`BGCA_確認表_${name.replace(/[^a-zA-Z0-9]/g,'_')}_${document.getElementById('sign-date').value}.pdf`);
-            alert('✅ PDF 已成功下載！');
+            // 使用 html2canvas 捕獲完整視覺 (包含圖片 + 填寫內容 + 簽名)
+            const canvasCapture = await html2canvas(container, {
+                scale: 2,           // 高解析度
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            });
+
+            const imgData = canvasCapture.toDataURL('image/png');
+
+            // 生成 PDF (A4 直向)
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // 計算圖片比例以適配 A4
+            const pdfWidth = 210;
+            const pdfHeight = 297;
+            const imgWidth = canvasCapture.width;
+            const imgHeight = canvasCapture.height;
+            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+            const finalWidth = imgWidth * ratio;
+            const finalHeight = imgHeight * ratio;
+            const xOffset = (pdfWidth - finalWidth) / 2;
+            const yOffset = (pdfHeight - finalHeight) / 2;
+
+            pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+
+            // 檔名
+            const fileName = `BGCA_確認表_${nameInput.replace(/[^a-zA-Z0-9]/g, '_')}_${dateInput}.pdf`;
+            
+            pdf.save(fileName);
+            
+            alert(`✅ PDF 已成功生成並下載！\n檔名：${fileName}\n\n您已完成確認程序。`);
         }
 
-        // 日期
-        function setDate() {
-            const d = new Date();
-            document.getElementById('sign-date').value = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+        // 設定當天日期 (香港格式 DD/MM/YYYY)
+        function setTodayDate() {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            document.getElementById('sign-date').value = `${day}/${month}/${year}`;
         }
 
-        window.onload = () => {
-            initSignature();
-            setDate();
-        };
+        // 初始化所有功能
+        function initializeApp() {
+            initTailwind();
+            initSignaturePad();
+            setTodayDate();
+            
+            // 預設顯示步驟 1
+            goToStep(1);
+            
+            // 鍵盤支援 (Enter 送出密碼)
+            document.getElementById('password-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkPassword();
+            });
+        }
+
+        // 啟動
+        window.onload = initializeApp;
     </script>
 </body>
 </html>
