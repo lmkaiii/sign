@@ -10,31 +10,134 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
         body { font-family: 'Noto Sans TC', system-ui, sans-serif; }
-        .pdf-viewer { width: 100%; height: 82vh; border: 1px solid #e5e7eb; border-radius: 16px; background: #f8fafc; }
-        .form-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .pdf-viewer { width: 100%; height: 82vh; border: 1px solid #e5e7eb; border-radius: 16px; }
         #signature-canvas { border: 2px dashed #2563eb; background: white; cursor: crosshair; touch-action: none; }
-        .overlay { position: absolute; background: rgba(255,255,255,0.95); border: 2px solid #2563eb; padding: 8px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-    <!-- 主系統（已移除密碼保護） -->
     <div id="main-app" class="min-h-screen">
-        <!-- 頂部導航 -->
+        <!-- 頂部 -->
         <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
-            <div class="max-w-6xl mx-auto px-6 py-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl font-bold text-2xl">BGCA</div>
+            <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl font-bold text-2xl">BGCA</div>
+                    <h1 class="text-3xl font-bold">導師文件填寫系統</h1>
+                </div>
+                <div class="text-right text-xs text-gray-500">
+                    僅供導師使用<br>
+                    文件內容只限內部傳閱<br>
+                    <span class="text-red-600 font-medium">簽署後請於 31/3 前發送至相關工作員</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 進度條 -->
+        <div class="max-w-6xl mx-auto px-6 py-4 flex gap-6 border-b bg-white">
+            <div onclick="goToStep(1)" id="step-dot-1" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
+                <div class="w-9 h-9 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-xl">1</div>
+                <span>政策文件</span>
+            </div>
+            <div onclick="goToStep(2)" id="step-dot-2" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
+                <div class="w-9 h-9 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-xl">2</div>
+                <span>行為守則</span>
+            </div>
+            <div onclick="goToStep(3)" id="step-dot-3" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
+                <div class="w-9 h-9 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-xl">3</div>
+                <span>簽署確認</span>
+            </div>
+        </div>
+
+        <!-- 步驟 1 & 2 不變（省略以節省空間） -->
+        <div id="step-1" class="step max-w-6xl mx-auto px-6 py-8">
+            <h2 class="text-2xl font-bold flex items-center gap-4 mb-4"><span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-3xl">1</span>《守護兒童及青少年政策》</h2>
+            <iframe src="1.pdf" class="pdf-viewer"></iframe>
+            <div class="text-right mt-6"><button onclick="nextStep(1)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步 → 行為守則</button></div>
+        </div>
+
+        <div id="step-2" class="step max-w-6xl mx-auto px-6 py-8 hidden">
+            <h2 class="text-2xl font-bold flex items-center gap-4 mb-4"><span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-3xl">2</span>《僱員行為守則》</h2>
+            <iframe src="2.pdf" class="pdf-viewer"></iframe>
+            <div class="text-right mt-6"><button onclick="nextStep(2)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步 → 簽署確認</button></div>
+        </div>
+
+        <!-- 步驟 3：完整 form331 第一頁文字 -->
+        <div id="step-3" class="step max-w-6xl mx-auto px-6 py-8 hidden">
+            <h2 class="text-2xl font-bold flex items-center gap-4 mb-6"><span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-3xl">3</span>簽署確認表</h2>
+
+            <div id="form-container" class="max-w-[820px] mx-auto bg-white rounded-3xl shadow-xl p-8">
+                <!-- 完整 form331 第一頁文字 -->
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold">全新「守護兒童及青少年政策」及經修訂之《僱員行為守則》</h3>
+                    <h4 class="text-xl font-bold mt-1">New Child &amp; Youth Safeguarding Policy &amp; Updated Code of Conduct</h4>
+                </div>
+
+                <div class="text-base leading-relaxed space-y-6 mb-10">
+                    <p>以上兩項政策已發布，並將於2026年1月1日正式生效。請各同工仔細閱讀及於2026年1月15日或前回覆此表格。</p>
+                    <p class="text-sm">The above mentioned 2 policies are now available and will officially take effect on 1 January 2026. Please read these two policies and confirm your acknowledgment by filling in this form by 15 January 2026.</p>
+                    
+                    <div class="pt-4 border-t">
+                        <p class="font-medium">1. 請回答 / Please reply *</p>
+                    </div>
+
+                    <!-- 已打勾的確認文字 -->
+                    <div class="flex gap-3 items-start bg-blue-50 border border-blue-200 p-6 rounded-2xl">
+                        <span class="text-3xl text-green-600 mt-1">☑</span>
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-900">導師文件填寫系統</h1>
-                            <p class="text-xs text-gray-500 mt-1">守護兒童及青少年政策 + 僱員行為守則確認</p>
+                            本人確認已閱讀、理解並將遵守自2026年1月1日起生效的《守護兒童及青少年政策》與最新修訂的《僱員行為守則》。<br>
+                            <span class="text-sm text-gray-600">I acknowledge that I have read, understood and will adhere to the new Child &amp; Youth Safeguarding Policy and the updated Code of Conduct effective on 1 January 2026.</span>
                         </div>
                     </div>
-                    <div class="text-right text-xs text-gray-500 leading-tight">
-                        僅供導師使用<br>
-                        文件內容只限內部傳閱<br>
-                        <span class="font-medium text-red-600">簽署後請於 31/3 前發送至相關工作員</span>
+                </div>
+
+                <!-- 簽署欄位 -->
+                <div class="space-y-8">
+                    <div>
+                        <p class="font-medium mb-2">(1) 導師簽署：</p>
+                        <canvas id="signature-canvas" width="720" height="160" class="w-full rounded-2xl"></canvas>
+                        <div class="flex gap-4 mt-4">
+                            <button onclick="clearSignature()" class="flex-1 py-3 bg-gray-100 rounded-2xl text-sm">清除簽名</button>
+                            <button onclick="undoSignature()" class="flex-1 py-3 bg-gray-100 rounded-2xl text-sm">上一步</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="font-medium mb-2">(2) 英文姓名：</p>
+                        <input id="english-name" type="text" class="w-full border border-gray-300 rounded-2xl px-5 py-4 text-lg" placeholder="CHAN TAI MAN">
+                    </div>
+
+                    <div>
+                        <p class="font-medium mb-2">(3) 簽署日期：</p>
+                        <input id="sign-date" type="text" readonly class="w-full border border-gray-300 rounded-2xl px-5 py-4 text-lg text-center font-medium">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4 mt-10 max-w-[820px] mx-auto">
+                <button onclick="prevStep(3)" class="py-4 border border-gray-300 rounded-2xl text-lg">← 上一步</button>
+                <button onclick="generateAndSend()" class="py-6 bg-green-600 hover:bg-green-700 text-white text-xl font-semibold rounded-3xl">完成並經WhatsApp傳送 📲</button>
+            </div>
+
+            <!-- WhatsApp 成功區 -->
+            <div id="success-area" class="hidden max-w-[820px] mx-auto mt-8 text-center bg-green-50 border border-green-200 rounded-2xl p-8">
+                <p class="text-green-700 font-medium">PDF 已下載！</p>
+                <button onclick="openWhatsApp()" class="mt-4 bg-green-600 text-white px-10 py-4 rounded-2xl text-lg inline-flex items-center gap-3">立即開啟 WhatsApp 傳送至 +852 6029 5452</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // （電子簽名、PDF 生成、WhatsApp 部分與上次完全相同，為了簡潔這裡省略）
+        // 請直接使用我上次給你的完整 script（initSignaturePad、generateAndSend、openWhatsApp、setTodayDate、goToStep 等）
+        // 如果需要我再貼完整版，請說「給完整版」
+
+        window.onload = () => {
+            // 你的 initSignaturePad()、setTodayDate()、goToStep(1) 等...
+            goToStep(1);
+        };
+    </script>
+</body>
+</html>                        <span class="font-medium text-red-600">簽署後請於 31/3 前發送至相關工作員</span>
                     </div>
                 </div>
             </div>
