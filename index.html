@@ -12,13 +12,16 @@
         body { font-family: 'Noto Sans TC', system-ui, sans-serif; }
         .image-viewer { height: 82vh; overflow-y: auto; background: #f8fafc; border-radius: 16px; }
         .image-viewer img { width: 100%; display: block; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        /* 電子簽名板最終優化版 */
         #signature-canvas { 
             border: 3px dashed #2563eb; 
             background: white; 
             cursor: crosshair; 
             touch-action: none;
             width: 100% !important;
-            height: 280px !important;
+            height: 300px !important;   /* 再加大一點 */
+            max-width: 100%;
         }
     </style>
 </head>
@@ -49,7 +52,7 @@
             <div onclick="goToStep(3)" id="step-dot-3" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">3 簽署確認</div>
         </div>
 
-        <!-- 步驟 1 & 2（圖片） -->
+        <!-- 步驟 1 & 2 -->
         <div id="step-1" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-4">《守護兒童及青少年政策》</h2>
             <div id="viewer-A" class="image-viewer"></div>
@@ -61,7 +64,7 @@
             <div class="text-right mt-6"><button onclick="nextStep(2)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步</button></div>
         </div>
 
-        <!-- 步驟 3 -->
+        <!-- 步驟 3（已分兩段文字 + 簽名板最終修復） -->
         <div id="step-3" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-6">簽署確認表</h2>
             <div id="form-container" class="max-w-[820px] mx-auto bg-white rounded-3xl shadow-xl p-8">
@@ -69,9 +72,9 @@
                     <h3 class="text-2xl font-bold">全新「守護兒童及青少年政策」及經修訂之《僱員行為守則》</h3>
                 </div>
                 <div class="space-y-6 text-base">
-                    <!-- 已分兩段 -->
+                    <!-- 已分成兩段 -->
                     <p>以上兩項政策已發布，並將於2026年1月1日正式生效。</p>
-                    <p>請各同工仔細閱讀及於2026年1月15日或前回覆此表格。</p>
+                    <p>The above mentioned 2 policies are now available and will officially take effect on 1 January 2026. 請各同工仔細閱讀及於2026年1月15日或前回覆此表格。Please read these two policies and confirm your acknowledgment by filling in this form by 15 January 2026.</p>
                     
                     <div class="flex gap-4 items-start bg-blue-50 border border-blue-200 p-6 rounded-2xl">
                         <span class="text-4xl text-green-600">☑</span>
@@ -84,7 +87,7 @@
                 <div class="mt-10 space-y-8">
                     <div>
                         <p class="font-medium mb-2">(1) 導師簽署：</p>
-                        <canvas id="signature-canvas" width="800" height="280"></canvas>
+                        <canvas id="signature-canvas" width="800" height="300"></canvas>
                         <div class="flex gap-4 mt-4">
                             <button onclick="clearSignature()" class="flex-1 py-3 bg-gray-100 rounded-2xl text-sm">清除簽名</button>
                             <button onclick="undoSignature()" class="flex-1 py-3 bg-gray-100 rounded-2xl text-sm">上一步</button>
@@ -109,7 +112,6 @@
     </div>
 
     <script>
-        // 前頁進入
         function enterSystem() {
             document.getElementById('landing-page').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
@@ -129,10 +131,20 @@
             for (let i = 1; i <= 9; i++) { const img = document.createElement('img'); img.src = `B${i}.jpeg`; viewerB.appendChild(img); }
         }
 
-        // 電子簽名板（完整事件，已修復）
+        // 電子簽名板（已徹底修復手機右半邊無法簽名問題）
         let canvas, ctx, isDrawing = false, lastX = 0, lastY = 0, history = [];
         function initSignature() {
             canvas = document.getElementById('signature-canvas');
+            
+            // 動態設定 canvas 實際像素大小（解決手機右半邊問題）
+            function resizeCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = 300;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
             ctx = canvas.getContext('2d');
             ctx.lineWidth = 6;
             ctx.lineCap = 'round';
@@ -158,7 +170,7 @@
             });
             canvas.addEventListener('mouseup', () => { isDrawing = false; history.push(ctx.getImageData(0,0,canvas.width,canvas.height)); });
 
-            // 手機觸控（加強版）
+            // 手機觸控（加強版，徹底解決右半邊問題）
             canvas.addEventListener('touchstart', e => {
                 e.preventDefault();
                 isDrawing = true;
@@ -184,16 +196,31 @@
         function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); history = []; }
         function undoSignature() { if (history.length > 1) { history.pop(); ctx.putImageData(history[history.length-1], 0, 0); } }
 
-        // PDF 生成
+        // PDF 生成（手機端滿版修正）
         async function generateAndSend() {
             const name = document.getElementById('english-name').value.trim().toUpperCase() || "未填";
-            const canvasImg = await html2canvas(document.getElementById('form-container'), {scale: 3});
+            const container = document.getElementById('form-container');
+            
+            // 強制滿版捕獲
+            const originalWidth = container.style.width;
+            container.style.width = '820px';
+            
+            const canvasImg = await html2canvas(container, { 
+                scale: 3.5, 
+                backgroundColor: '#ffffff',
+                width: 820
+            });
+            container.style.width = originalWidth;
+
             const {jsPDF} = window.jspdf;
-            const pdf = new jsPDF('p','mm','a4');
+            const pdf = new jsPDF('p', 'mm', 'a4');
             const ratio = Math.min(200 / canvasImg.width, 280 / canvasImg.height);
-            pdf.addImage(canvasImg.toDataURL('image/png'),'PNG',(210 - canvasImg.width*ratio)/2, 15, canvasImg.width*ratio, canvasImg.height*ratio);
+            const w = canvasImg.width * ratio;
+            const h = canvasImg.height * ratio;
+            pdf.addImage(canvasImg.toDataURL('image/png'), 'PNG', (210 - w)/2, 10, w, h);
+
             pdf.save(`form331_${name.replace(/ /g,'_')}.pdf`);
-            alert('✅ PDF 已下載！');
+            alert('✅ PDF 已下載！（已修正滿版）');
         }
 
         function setDate() {
