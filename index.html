@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>導師文件填寫系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
         body { font-family: 'Noto Sans TC', system-ui, sans-serif; }
         
-        /* 乾淨無框圖片瀏覽器 */
+        /* 乾淨全屏圖片瀏覽（無框） */
         .image-viewer { 
             height: 82vh; 
             overflow-y: auto; 
@@ -23,7 +22,7 @@
             margin-bottom: 8px; 
         }
 
-        /* 簽名板加大 + 修復 */
+        /* 簽名板最終穩定版 */
         #signature-canvas { 
             border: 3px dashed #2563eb; 
             background: white; 
@@ -45,6 +44,11 @@
             font-size: 13px;
             color: #854d0e;
             z-index: 50;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -77,18 +81,24 @@
             <div onclick="goToStep(3)" id="step-dot-3" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">3 簽署確認</div>
         </div>
 
-        <!-- 步驟 1（乾淨無框） -->
+        <!-- 步驟 1 -->
         <div id="step-1" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-4">《守護兒童及青少年政策》</h2>
             <div id="viewer-A" class="image-viewer"></div>
-            <div class="text-right mt-6"><button onclick="nextStep(1)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步</button></div>
+            <div class="text-right mt-6">
+                <button id="next-btn-1" onclick="nextStep(1)" 
+                        class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg" disabled>下一步</button>
+            </div>
         </div>
 
-        <!-- 步驟 2（乾淨無框） -->
+        <!-- 步驟 2 -->
         <div id="step-2" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-4">《僱員行為守則》</h2>
             <div id="viewer-B" class="image-viewer"></div>
-            <div class="text-right mt-6"><button onclick="nextStep(2)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步</button></div>
+            <div class="text-right mt-6">
+                <button id="next-btn-2" onclick="nextStep(2)" 
+                        class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg" disabled>下一步</button>
+            </div>
         </div>
 
         <!-- 步驟 3 -->
@@ -99,8 +109,8 @@
                     <h3 class="text-2xl font-bold">全新「守護兒童及青少年政策」及經修訂之《僱員行為守則》</h3>
                 </div>
                 <div class="space-y-6 text-base">
-                    <p>以上兩項政策已發布，並將於2026年1月1日正式生效。The above mentioned 2 policies are now available and will officially take effect on 1 January 2026.</p>
-                    <p>請各同工仔細閱讀及於2026年1月15日或前回覆此表格。Please read these two policies and confirm your acknowledgment by filling in this form by 15 January 2026.</p>
+                    <p>以上兩項政策已發布，並將於2026年1月1日正式生效。</p>
+                    <p>The above mentioned 2 policies are now available and will officially take effect on 1 January 2026. 請各同工仔細閱讀及於2026年1月15日或前回覆此表格。Please read these two policies and confirm your acknowledgment by filling in this form by 15 January 2026.</p>
                     
                     <div class="flex gap-4 items-start bg-blue-50 border border-blue-200 p-6 rounded-2xl">
                         <span class="text-4xl text-green-600">☑</span>
@@ -132,7 +142,7 @@
             <div class="mt-10 max-w-[820px] mx-auto">
                 <button onclick="generateAndSend()" 
                         class="w-full py-6 bg-green-600 hover:bg-green-700 text-white text-xl font-semibold rounded-3xl">
-                    完成並經WhatsApp傳送 📲
+                    完成✅
                 </button>
             </div>
         </div>
@@ -155,6 +165,7 @@
         }
         function nextStep(n) { n===1 ? goToStep(2) : goToStep(3); }
 
+        // 載入圖片 + 強制滑到底部才能按下一步
         function loadImages() {
             const viewerA = document.getElementById('viewer-A');
             for (let i = 1; i <= 15; i++) { 
@@ -168,54 +179,68 @@
                 img.src = `B${i}.jpeg`; 
                 viewerB.appendChild(img); 
             }
+
+            // 強制滑到底部才能下一步
+            setTimeout(() => {
+                const nextBtn1 = document.getElementById('next-btn-1');
+                const nextBtn2 = document.getElementById('next-btn-2');
+
+                if (nextBtn1) {
+                    nextBtn1.disabled = true;
+                    viewerA.addEventListener('scroll', () => {
+                        if (viewerA.scrollTop + viewerA.clientHeight >= viewerA.scrollHeight - 30) {
+                            nextBtn1.disabled = false;
+                        }
+                    });
+                }
+                if (nextBtn2) {
+                    nextBtn2.disabled = true;
+                    viewerB.addEventListener('scroll', () => {
+                        if (viewerB.scrollTop + viewerB.clientHeight >= viewerB.scrollHeight - 30) {
+                            nextBtn2.disabled = false;
+                        }
+                    });
+                }
+            }, 800);
         }
 
-        // 簽名板（最終穩定版）
+        // 簽名板（穩定版）
         let canvas, ctx;
         function initSignature() {
             canvas = document.getElementById('signature-canvas');
-            
-            function resize() {
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width * 2;   // 高解析度
-                canvas.height = 640;
-            }
-            resize();
-            window.addEventListener('resize', resize);
-
             ctx = canvas.getContext('2d');
             ctx.lineWidth = 8;
             ctx.lineCap = 'round';
             ctx.strokeStyle = '#1e40af';
 
-            // 滑鼠
-            canvas.addEventListener('mousedown', e => { 
-                isDrawing = true; 
-                const r = canvas.getBoundingClientRect(); 
-                lastX = (e.clientX - r.left) * 2; 
-                lastY = (e.clientY - r.top) * 2; 
+            let isDrawing = false, lastX = 0, lastY = 0;
+
+            canvas.addEventListener('mousedown', e => {
+                isDrawing = true;
+                const r = canvas.getBoundingClientRect();
+                lastX = e.clientX - r.left;
+                lastY = e.clientY - r.top;
             });
             canvas.addEventListener('mousemove', e => {
                 if (!isDrawing) return;
                 const r = canvas.getBoundingClientRect();
                 ctx.beginPath();
                 ctx.moveTo(lastX, lastY);
-                ctx.lineTo((e.clientX - r.left) * 2, (e.clientY - r.top) * 2);
+                ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
                 ctx.stroke();
-                lastX = (e.clientX - r.left) * 2;
-                lastY = (e.clientY - r.top) * 2;
+                lastX = e.clientX - r.left;
+                lastY = e.clientY - r.top;
             });
             canvas.addEventListener('mouseup', () => { isDrawing = false; });
 
-            // 手機觸控（徹底修復右半邊）
-            let isDrawing = false;
+            // 手機觸控
             canvas.addEventListener('touchstart', e => {
                 e.preventDefault();
                 isDrawing = true;
                 const r = canvas.getBoundingClientRect();
                 const t = e.touches[0];
-                lastX = (t.clientX - r.left) * 2;
-                lastY = (t.clientY - r.top) * 2;
+                lastX = t.clientX - r.left;
+                lastY = t.clientY - r.top;
             });
             canvas.addEventListener('touchmove', e => {
                 e.preventDefault();
@@ -224,42 +249,32 @@
                 const t = e.touches[0];
                 ctx.beginPath();
                 ctx.moveTo(lastX, lastY);
-                ctx.lineTo((t.clientX - r.left) * 2, (t.clientY - r.top) * 2);
+                ctx.lineTo(t.clientX - r.left, t.clientY - r.top);
                 ctx.stroke();
-                lastX = (t.clientX - r.left) * 2;
-                lastY = (t.clientY - r.top) * 2;
+                lastX = t.clientX - r.left;
+                lastY = t.clientY - r.top;
             });
             canvas.addEventListener('touchend', () => { isDrawing = false; });
         }
         function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); }
 
-        // PDF 生成（滿版 A4 + 只下載）
+        // 生成 JPEG（高解析度 + 滿版）
         async function generateAndSend() {
             const name = (document.getElementById('english-name').value.trim().toUpperCase() || "未填").replace(/ /g, '_');
             
             const container = document.getElementById('form-container');
-            const canvasImg = await html2canvas(container, { scale: 3.8, backgroundColor: '#ffffff' });
+            const canvasImg = await html2canvas(container, { 
+                scale: 4, 
+                backgroundColor: '#ffffff',
+                width: 820 
+            });
 
-            const {jsPDF} = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            
-            // 強制滿版計算
-            const pageWidth = 210;
-            const pageHeight = 297;
-            const imgRatio = canvasImg.width / canvasImg.height;
-            let finalWidth = pageWidth - 20;
-            let finalHeight = finalWidth / imgRatio;
-            
-            if (finalHeight > pageHeight - 30) {
-                finalHeight = pageHeight - 30;
-                finalWidth = finalHeight * imgRatio;
-            }
-            
-            pdf.addImage(canvasImg.toDataURL('image/png'), 'PNG', 
-                (pageWidth - finalWidth) / 2, 15, finalWidth, finalHeight);
+            const link = document.createElement('a');
+            link.download = `form331_${name}.jpeg`;
+            link.href = canvasImg.toDataURL('image/jpeg', 0.95);
+            link.click();
 
-            pdf.save(`form331_${name}.pdf`);
-            alert('✅ PDF 已成功下載！（已修正滿版）');
+            alert('✅ JPEG 已成功下載！');
         }
 
         function setDate() {
