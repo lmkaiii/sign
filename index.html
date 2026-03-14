@@ -30,7 +30,14 @@
             cursor: crosshair; 
             touch-action: none;
             width: 100% !important;
-            height: 400px !important;   /* 調整高度參考你的示例 */
+            height: 340px !important;
+        }
+
+        #fixed-signature { 
+            border: 3px solid #2563eb; 
+            width: 100% !important;
+            height: 340px !important;
+            object-fit: contain;
         }
 
         .footer-warning {
@@ -120,7 +127,12 @@
                         <canvas id="signature-canvas" width="800" height="340"></canvas>
                         <div class="flex gap-4 mt-4">
                             <button onclick="clearSignature()" class="text-xs px-6 py-2 bg-gray-100 rounded-2xl">清除簽名</button>
+                            <button onclick="completeSignature()" class="text-xs px-6 py-2 bg-green-100 rounded-2xl">完成簽名</button>
                         </div>
+                    </div>
+                    <div id="fixed-signature-container" class="hidden">
+                        <p class="font-medium mb-2">(1) 導師簽署：</p>
+                        <img id="fixed-signature" alt="固定簽名" style="width: 100%; height: 340px; border: 3px solid #2563eb;">
                     </div>
                     <div>
                         <p class="font-medium mb-2">(2) 英文姓名：</p>
