@@ -10,16 +10,20 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
         body { font-family: 'Noto Sans TC', system-ui, sans-serif; }
         
-        /* 修正雙重滑動條 → 每部分只有一個滑動條 */
-        .step { height: calc(100vh - 180px); overflow: hidden; }
-        .image-viewer { 
-            height: 100%; 
+        /* 移除內層，直接在外層滑動 */
+        .step { 
+            height: calc(100vh - 180px); 
             overflow-y: auto; 
             background: #f8fafc; 
+            padding: 0 16px;
         }
-        .image-viewer img { width: 100%; display: block; margin-bottom: 8px; }
+        .step img { 
+            width: 100%; 
+            display: block; 
+            margin-bottom: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
 
-        /* 簽名板加大 + 修復向下捲動消失問題 */
         #signature-canvas { 
             border: 3px dashed #2563eb; 
             background: white; 
@@ -63,6 +67,205 @@
         <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
             <div class="max-w-6xl mx-auto px-6 py-4">
                 <h1 class="text-2xl font-bold text-center">導師文件填寫系統</h1>
+            </div>
+        </nav>
+
+        <!-- 進度條 -->
+        <div class="max-w-6xl mx-auto px-6 py-4 flex gap-6 border-b bg-white">
+            <div onclick="goToStep(1)" id="step-dot-1" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">1 政策文件</div>
+            <div onclick="goToStep(2)" id="step-dot-2" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">2 行為守則</div>
+            <div onclick="goToStep(3)" id="step-dot-3" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">3 簽署確認</div>
+        </div>
+
+        <!-- 步驟 1（直接在外層滑動） -->
+        <div id="step-1" class="step max-w-6xl mx-auto hidden">
+            <h2 class="text-2xl font-bold mb-4 sticky top-0 bg-white py-3 z-10">《守護兒童及青少年政策》</h2>
+            <div id="viewer-A"></div>
+            <div class="text-right py-6">
+                <button id="next-btn-1" onclick="nextStep(1)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg" disabled>下一步</button>
+            </div>
+        </div>
+
+        <!-- 步驟 2（直接在外層滑動） -->
+        <div id="step-2" class="step max-w-6xl mx-auto hidden">
+            <h2 class="text-2xl font-bold mb-4 sticky top-0 bg-white py-3 z-10">《僱員行為守則》</h2>
+            <div id="viewer-B"></div>
+            <div class="text-right py-6">
+                <button id="next-btn-2" onclick="nextStep(2)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg" disabled>下一步</button>
+            </div>
+        </div>
+
+        <!-- 步驟 3 -->
+        <div id="step-3" class="step max-w-6xl mx-auto px-6 py-8 hidden">
+            <h2 class="text-2xl font-bold mb-6">簽署確認表</h2>
+            <div id="form-container" class="max-w-[820px] mx-auto bg-white rounded-3xl shadow-xl p-8">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold">全新「守護兒童及青少年政策」及經修訂之《僱員行為守則》</h3>
+                </div>
+                <div class="space-y-6 text-base">
+                    <p>以上兩項政策已發布，並將於2026年1月1日正式生效。</p>
+                    <p>The above mentioned 2 policies are now available and will officially take effect on 1 January 2026. 請各同工仔細閱讀及於2026年1月15日或前回覆此表格。Please read these two policies and confirm your acknowledgment by filling in this form by 15 January 2026.</p>
+                    
+                    <div class="flex gap-4 items-start bg-blue-50 border border-blue-200 p-6 rounded-2xl">
+                        <span class="text-4xl text-green-600">☑</span>
+                        <div>本人確認已閱讀、理解並將遵守自2026年1月1日起生效的《守護兒童及青少年政策》與最新修訂的《僱員行為守則》。<br>
+                            <span class="text-sm text-gray-600">I acknowledge that I have read, understood and will adhere to the new Child &amp; Youth Safeguarding Policy and the updated Code of Conduct effective on 1 January 2026.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 space-y-8">
+                    <div>
+                        <p class="font-medium mb-2">(1) 導師簽署：</p>
+                        <canvas id="signature-canvas" width="800" height="340"></canvas>
+                        <div class="flex gap-4 mt-4">
+                            <button onclick="clearSignature()" class="text-xs px-6 py-2 bg-gray-100 rounded-2xl">清除簽名</button>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="font-medium mb-2">(2) 英文姓名：</p>
+                        <input id="english-name" type="text" class="w-full border border-gray-300 rounded-2xl px-5 py-4 text-lg" placeholder="CHAN TAI MAN">
+                    </div>
+                    <div>
+                        <p class="font-medium mb-2">(3) 簽署日期：</p>
+                        <input id="sign-date" type="text" readonly class="w-full border border-gray-300 rounded-2xl px-5 py-4 text-lg text-left font-medium">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 max-w-[820px] mx-auto">
+                <button onclick="generateAndSend()" 
+                        class="w-full py-6 bg-green-600 hover:bg-green-700 text-white text-xl font-semibold rounded-3xl">
+                    完成✅
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部警示 -->
+    <div class="footer-warning">
+        ⚠️ 僅供導師使用，文件內容只限內部傳閱
+    </div>
+
+    <script>
+        function enterSystem() {
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            goToStep(1);
+        }
+        function goToStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step-${n}`).classList.remove('hidden');
+        }
+        function nextStep(n) { n===1 ? goToStep(2) : goToStep(3); }
+
+        // 載入圖片 + 強制滑到底部才能下一步
+        function loadImages() {
+            const viewerA = document.getElementById('viewer-A');
+            for (let i = 1; i <= 15; i++) { 
+                const img = document.createElement('img'); 
+                img.src = `A${i}.jpeg`; 
+                viewerA.appendChild(img); 
+            }
+            const viewerB = document.getElementById('viewer-B');
+            for (let i = 1; i <= 9; i++) { 
+                const img = document.createElement('img'); 
+                img.src = `B${i}.jpeg`; 
+                viewerB.appendChild(img); 
+            }
+
+            setTimeout(() => {
+                const next1 = document.getElementById('next-btn-1');
+                const next2 = document.getElementById('next-btn-2');
+                next1.disabled = true;
+                viewerA.onscroll = () => {
+                    if (viewerA.scrollTop + viewerA.clientHeight >= viewerA.scrollHeight - 30) next1.disabled = false;
+                };
+                next2.disabled = true;
+                viewerB.onscroll = () => {
+                    if (viewerB.scrollTop + viewerB.clientHeight >= viewerB.scrollHeight - 30) next2.disabled = false;
+                };
+            }, 500);
+        }
+
+        // 簽名板（穩定版）
+        let canvas, ctx;
+        function initSignature() {
+            canvas = document.getElementById('signature-canvas');
+            ctx = canvas.getContext('2d');
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#1e40af';
+
+            let isDrawing = false, lastX = 0, lastY = 0;
+
+            canvas.addEventListener('mousedown', e => {
+                isDrawing = true;
+                const r = canvas.getBoundingClientRect();
+                lastX = e.clientX - r.left;
+                lastY = e.clientY - r.top;
+            });
+            canvas.addEventListener('mousemove', e => {
+                if (!isDrawing) return;
+                const r = canvas.getBoundingClientRect();
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+                ctx.stroke();
+                lastX = e.clientX - r.left;
+                lastY = e.clientY - r.top;
+            });
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+
+            canvas.addEventListener('touchstart', e => {
+                e.preventDefault();
+                isDrawing = true;
+                const r = canvas.getBoundingClientRect();
+                const t = e.touches[0];
+                lastX = t.clientX - r.left;
+                lastY = t.clientY - r.top;
+            });
+            canvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const r = canvas.getBoundingClientRect();
+                const t = e.touches[0];
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(t.clientX - r.left, t.clientY - r.top);
+                ctx.stroke();
+                lastX = t.clientX - r.left;
+                lastY = t.clientY - r.top;
+            });
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+        function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+        // 生成 JPEG（滿版）
+        async function generateAndSend() {
+            const name = (document.getElementById('english-name').value.trim().toUpperCase() || "未填").replace(/ /g, '_');
+            const canvasImg = await html2canvas(document.getElementById('form-container'), { scale: 4 });
+            
+            const link = document.createElement('a');
+            link.download = `form331_${name}.jpeg`;
+            link.href = canvasImg.toDataURL('image/jpeg', 0.95);
+            link.click();
+            alert('✅ JPEG 已成功下載');
+        }
+
+        function setDate() {
+            const d = new Date();
+            document.getElementById('sign-date').value = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+        }
+
+        window.onload = () => {
+            loadImages();
+            initSignature();
+            setDate();
+        };
+    </script>
+</body>
+</html>                <h1 class="text-2xl font-bold text-center">導師文件填寫系統</h1>
             </div>
         </nav>
 
