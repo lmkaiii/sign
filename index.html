@@ -1,453 +1,256 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="zh-HK">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGCA 導師文件填寫系統</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        
+        body { 
+            font-family: 'Noto Sans TC', system-ui, sans-serif; 
+            margin: 0;
+            background: #f8fafc;
+        }
+        .hidden { display: none !important; }
+        
+        /* 自訂樣式（取代 Tailwind） */
+        .btn-blue {
+            background: #2563eb;
+            color: white;
+            padding: 16px 40px;
+            border-radius: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-blue:hover { background: #1e40af; }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .overlay {
+            position: absolute;
+            background: rgba(255,255,255,0.95);
+            border: 2px solid #2563eb;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        #signature-canvas {
+            border: 2px dashed #2563eb;
+            background: white;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        
+        .pdf-viewer {
+            width: 100%;
+            height: 75vh;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            background: #f8fafc;
+        }
+        
+        .step-dot {
+            width: 28px; height: 28px;
+            background: #dbeafe;
+            color: #2563eb;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="zh-HK"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;BGCA 導師文件填寫系統&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&amp;display=swap');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>body { font-family: 'Noto Sans TC', system-ui, sans-serif; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.step { transition: all 0.3s; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.hidden { display: none !important; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.form-container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 800px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0 auto;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 10px 30px rgba(0,0,0,0.2);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.form-container img {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: auto;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.overlay {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(255,255,255,0.95);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #3b82f6;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>#signature-canvas {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px dashed #3b82f6;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: crosshair;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>touch-action: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.pdf-viewer {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 75vh;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #e5e7eb;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #f8fafc;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body class="bg-gray-50"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 密碼頁面 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="password-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bg-white rounded-2xl shadow-2xl p-10 max-w-md w-full mx-4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="text-center mb-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;h1 class="text-3xl font-bold text-gray-800"&gt;香港小童群益會&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-blue-600 font-medium mt-2"&gt;導師文件確認系統&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="space-y-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;label class="block text-sm font-medium text-gray-700 mb-2"&gt;輸入密碼&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;input id="password-input"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                           </span>type="password"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                           </span>class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 text-lg"</p>
-<p class="p1"><span class="Apple-converted-space">                           </span>placeholder="bgcafanling"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="checkPassword()"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 rounded-xl transition-all text-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>進入系統</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-xs text-gray-500 text-center"&gt;僅供內部導師使用 • 密碼：bgcafanling&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 主系統 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="main-app" class="hidden min-h-screen bg-gray-50"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 頂部導航 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;nav class="bg-white shadow-sm border-b"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="flex items-center gap-3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="bg-blue-600 text-white px-4 py-1.5 rounded-xl font-bold text-lg"&gt;BGCA&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h1 class="text-xl font-bold text-gray-800"&gt;導師文件填寫系統&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;p class="text-xs text-gray-500"&gt;守護兒童及青少年政策 + 僱員行為守則確認&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="flex items-center gap-8 text-sm"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div onclick="goToStep(1)" id="step-dot-1"</p>
-<p class="p1"><span class="Apple-converted-space">                         </span>class="flex items-center gap-2 cursor-pointer hover:text-blue-600"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold"&gt;1&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="font-medium"&gt;政策文件&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div onclick="goToStep(2)" id="step-dot-2"</p>
-<p class="p1"><span class="Apple-converted-space">                         </span>class="flex items-center gap-2 cursor-pointer hover:text-blue-600"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold"&gt;2&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="font-medium"&gt;行為守則&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div onclick="goToStep(3)" id="step-dot-3"</p>
-<p class="p1"><span class="Apple-converted-space">                         </span>class="flex items-center gap-2 cursor-pointer hover:text-blue-600"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold"&gt;3&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="font-medium"&gt;簽署確認&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="logout()"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>class="text-sm text-gray-500 hover:text-red-600 flex items-center gap-1"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>登出</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/nav&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 步驟 1：1.pdf --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="step-1" class="step max-w-6xl mx-auto px-6 py-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="mb-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span class="bg-blue-600 text-white w-8 h-8 rounded-xl flex items-center justify-center text-lg"&gt;1&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>《守護兒童及青少年政策》 (1.pdf)</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-500 mt-1"&gt;請仔細閱讀完整文件&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;iframe src="1.pdf" class="pdf-viewer rounded-2xl"&gt;&lt;/iframe&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex justify-end mt-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="nextStep(1)"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl flex items-center gap-3 transition-all"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>下一步 → 行為守則</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 步驟 2：2.pdf --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="step-2" class="step max-w-6xl mx-auto px-6 py-8 hidden"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="mb-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span class="bg-blue-600 text-white w-8 h-8 rounded-xl flex items-center justify-center text-lg"&gt;2&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>《僱員行為守則》 (2.pdf)</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-500 mt-1"&gt;請仔細閱讀完整文件&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;iframe src="2.pdf" class="pdf-viewer rounded-2xl"&gt;&lt;/iframe&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex justify-end mt-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="nextStep(2)"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl flex items-center gap-3 transition-all"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>下一步 → 簽署確認</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 步驟 3：簽署頁面 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="step-3" class="step max-w-6xl mx-auto px-6 py-8 hidden"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="mb-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span class="bg-blue-600 text-white w-8 h-8 rounded-xl flex items-center justify-center text-lg"&gt;3&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>簽署確認表 (image004.png)</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-500"&gt;請在圖片空白位置填寫英文姓名、電子簽名及日期，然後提交&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 表單容器 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="form-container" class="form-container mx-auto"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;img id="form-image" src="image004.png" alt="確認表格" class="w-full rounded-t-2xl"&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- 英文姓名 (可自行調整位置) --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="overlay" style="top: 68%; left: 12%; width: 38%;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;input id="english-name"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                           </span>type="text"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                           </span>placeholder="English Name (e.g. John Chan)"</p>
-<p class="p1"><span class="Apple-converted-space">                           </span>class="w-full px-4 py-3 text-lg border-0 focus:outline-none font-medium"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- 簽署日期 (自動) --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="overlay" style="top: 68%; left: 58%; width: 28%;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;input id="sign-date"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                           </span>type="text"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                           </span>readonly</p>
-<p class="p1"><span class="Apple-converted-space">                           </span>class="w-full px-4 py-3 text-lg border-0 bg-transparent font-medium text-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- 電子簽名框 (可自行調整位置與大小) --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="overlay" style="top: 78%; left: 12%; width: 48%; padding: 12px; background: white;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p class="text-xs text-gray-500 mb-2 font-medium"&gt;電子簽名 (請用滑鼠或手指繪寫)&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;canvas id="signature-canvas" width="380" height="140" class="rounded-xl"&gt;&lt;/canvas&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="flex gap-3 mt-3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button onclick="clearSignature()"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                                </span>class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-xl text-sm font-medium"&gt;清除簽名&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button onclick="undoSignature()"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                                </span>class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-xl text-sm font-medium"&gt;上一步&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex justify-center gap-4 mt-12"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="prevStep(3)"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>class="px-8 py-4 border border-gray-300 rounded-2xl font-medium"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>← 上一步</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="generatePDF()"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>class="px-12 py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-2xl flex items-center gap-3 text-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span&gt;提交並生成 PDF&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13v6m-3-3l-3 3m0-6l-3-3" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;p class="text-center text-xs text-gray-400 mt-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>2026 年 1 月 15 日或之前完成 • 生成的 PDF 會自動下載</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Tailwind 初始化</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function initTailwind() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 已透過 CDN 引入</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// 密碼驗證</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function checkPassword() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const input = document.getElementById('password-input').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (input === 'bgcafanling') {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('password-screen').classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('main-app').classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>goToStep(1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>alert('密碼錯誤！請輸入 bgcafanling');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// 步驟切換</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let currentStep = 1;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function goToStep(step) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>currentStep = step;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.querySelectorAll('.step').forEach(s =&gt; s.classList.add('hidden'));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById(`step-${step}`).classList.remove('hidden');</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 更新進度點樣式</p>
-<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 1; i &lt;= 3; i++) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const dot = document.getElementById(`step-dot-${i}`);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (i &lt; currentStep) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>dot.classList.add('text-blue-600');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>} else if (i === currentStep) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>dot.classList.add('text-blue-600', 'font-bold');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function nextStep(from) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (from === 1) goToStep(2);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (from === 2) goToStep(3);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function prevStep(from) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (from === 3) goToStep(2);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// 登出</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function logout() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (confirm('確定要登出嗎？')) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>location.reload();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// ==================== 電子簽名功能 ====================</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let canvas, ctx, isDrawing = false, lastX = 0, lastY = 0;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let signatureHistory = [];</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function initSignaturePad() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>canvas = document.getElementById('signature-canvas');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx = canvas.getContext('2d');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.lineWidth = 3;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.lineCap = 'round';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.strokeStyle = '#1e40af';</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 滑鼠事件</p>
-<p class="p1"><span class="Apple-converted-space">            </span>canvas.addEventListener('mousedown', startDrawing);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>canvas.addEventListener('mousemove', draw);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>canvas.addEventListener('mouseup', stopDrawing);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>canvas.addEventListener('mouseout', stopDrawing);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 觸控事件 (手機/平板)</p>
-<p class="p1"><span class="Apple-converted-space">            </span>canvas.addEventListener('touchstart', handleTouchStart);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>canvas.addEventListener('touchmove', handleTouchMove);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>canvas.addEventListener('touchend', stopDrawing);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function startDrawing(e) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>isDrawing = true;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const rect = canvas.getBoundingClientRect();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>lastX = e.clientX - rect.left;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>lastY = e.clientY - rect.top;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>signatureHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function draw(e) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!isDrawing) return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const rect = canvas.getBoundingClientRect();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const x = e.clientX - rect.left;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const y = e.clientY - rect.top;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.beginPath();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.moveTo(lastX, lastY);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.lineTo(x, y);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.stroke();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>lastX = x;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>lastY = y;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function stopDrawing() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (isDrawing) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>isDrawing = false;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>signatureHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function handleTouchStart(e) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>e.preventDefault();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>isDrawing = true;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const rect = canvas.getBoundingClientRect();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const touch = e.touches[0];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>lastX = touch.clientX - rect.left;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>lastY = touch.clientY - rect.top;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>signatureHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function handleTouchMove(e) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>e.preventDefault();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!isDrawing) return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const rect = canvas.getBoundingClientRect();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const touch = e.touches[0];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const x = touch.clientX - rect.left;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const y = touch.clientY - rect.top;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.beginPath();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.moveTo(lastX, lastY);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.lineTo(x, y);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.stroke();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>lastX = x;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>lastY = y;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function clearSignature() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.clearRect(0, 0, canvas.width, canvas.height);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>signatureHistory = [];</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function undoSignature() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (signatureHistory.length &gt; 1) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>signatureHistory.pop();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>ctx.putImageData(signatureHistory[signatureHistory.length - 1], 0, 0);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else if (signatureHistory.length === 1) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>ctx.clearRect(0, 0, canvas.width, canvas.height);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>signatureHistory = [];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// ==================== PDF 生成 ====================</p>
-<p class="p1"><span class="Apple-converted-space">        </span>async function generatePDF() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const nameInput = document.getElementById('english-name').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const dateInput = document.getElementById('sign-date').value;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!nameInput) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>alert('請填寫英文姓名');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!ctx || ctx.getImageData(0,0,canvas.width,canvas.height).data.every(pixel =&gt; pixel === 0)) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>alert('請繪寫電子簽名');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const container = document.getElementById('form-container');</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 使用 html2canvas 捕獲完整視覺 (包含圖片 + 填寫內容 + 簽名)</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const canvasCapture = await html2canvas(container, {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>scale: 2, <span class="Apple-converted-space">          </span>// 高解析度</p>
-<p class="p1"><span class="Apple-converted-space">                </span>useCORS: true,</p>
-<p class="p1"><span class="Apple-converted-space">                </span>backgroundColor: '#ffffff'</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const imgData = canvasCapture.toDataURL('image/png');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 生成 PDF (A4 直向)</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const { jsPDF } = window.jspdf;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const pdf = new jsPDF({</p>
-<p class="p1"><span class="Apple-converted-space">                </span>orientation: 'portrait',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>unit: 'mm',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>format: 'a4'</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 計算圖片比例以適配 A4</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const pdfWidth = 210;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const pdfHeight = 297;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const imgWidth = canvasCapture.width;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const imgHeight = canvasCapture.height;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const finalWidth = imgWidth * ratio;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const finalHeight = imgHeight * ratio;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const xOffset = (pdfWidth - finalWidth) / 2;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const yOffset = (pdfHeight - finalHeight) / 2;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 檔名</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const fileName = `BGCA_確認表_${nameInput.replace(/[^a-zA-Z0-9]/g, '_')}_${dateInput}.pdf`;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>pdf.save(fileName);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>alert(`✅ PDF 已成功生成並下載！\n檔名：${fileName}\n\n您已完成確認程序。`);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// 設定當天日期 (香港格式 DD/MM/YYYY)</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function setTodayDate() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const today = new Date();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const day = String(today.getDate()).padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const month = String(today.getMonth() + 1).padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const year = today.getFullYear();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sign-date').value = `${day}/${month}/${year}`;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// 初始化所有功能</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function initializeApp() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>initTailwind();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>initSignaturePad();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>setTodayDate();</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 預設顯示步驟 1</p>
-<p class="p1"><span class="Apple-converted-space">            </span>goToStep(1);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 鍵盤支援 (Enter 送出密碼)</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('password-input').addEventListener('keypress', function(e) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (e.key === 'Enter') checkPassword();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// 啟動</p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.onload = initializeApp;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+    <!-- 密碼畫面 -->
+    <div id="password-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700">
+        <div class="card p-10 max-w-md w-full mx-4 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">香港小童群益會</h1>
+            <p class="text-blue-600 font-medium mt-2">導師文件確認系統</p>
+            
+            <div class="mt-8 space-y-6">
+                <input id="password-input" type="password" 
+                       class="w-full px-5 py-4 border border-gray-300 rounded-2xl text-lg focus:outline-none focus:border-blue-500"
+                       placeholder="輸入密碼">
+                <button onclick="checkPassword()" 
+                        class="btn-blue w-full text-lg">進入系統</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主系統 -->
+    <div id="main-app" class="hidden min-h-screen">
+        <!-- 頂部導航 -->
+        <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+            <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl font-bold text-xl">BGCA</div>
+                    <div>
+                        <h1 class="text-2xl font-bold">導師文件填寫系統</h1>
+                    </div>
+                </div>
+                <div class="flex gap-8">
+                    <div onclick="goToStep(1)" id="step-dot-1" class="cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
+                        <div class="step-dot">1</div> 政策文件
+                    </div>
+                    <div onclick="goToStep(2)" id="step-dot-2" class="cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
+                        <div class="step-dot">2</div> 行為守則
+                    </div>
+                    <div onclick="goToStep(3)" id="step-dot-3" class="cursor-pointer flex items-center gap-3 text-blue-600 font-medium">
+                        <div class="step-dot">3</div> 簽署確認
+                    </div>
+                </div>
+                <button onclick="logout()" class="text-red-500 hover:text-red-600">登出</button>
+            </div>
+        </nav>
+
+        <!-- 步驟 1 -->
+        <div id="step-1" class="max-w-6xl mx-auto px-6 py-8">
+            <h2 class="text-3xl font-bold flex items-center gap-4 mb-6">
+                <span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl">1</span>
+                《守護兒童及青少年政策》 (1.pdf)
+            </h2>
+            <iframe src="1.pdf" class="pdf-viewer"></iframe>
+            <div class="text-right mt-8">
+                <button onclick="nextStep(1)" class="btn-blue">下一步 → 行為守則</button>
+            </div>
+        </div>
+
+        <!-- 步驟 2 -->
+        <div id="step-2" class="max-w-6xl mx-auto px-6 py-8 hidden">
+            <h2 class="text-3xl font-bold flex items-center gap-4 mb-6">
+                <span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl">2</span>
+                《僱員行為守則》 (2.pdf)
+            </h2>
+            <iframe src="2.pdf" class="pdf-viewer"></iframe>
+            <div class="text-right mt-8">
+                <button onclick="nextStep(2)" class="btn-blue">下一步 → 簽署確認</button>
+            </div>
+        </div>
+
+        <!-- 步驟 3：簽署 -->
+        <div id="step-3" class="max-w-6xl mx-auto px-6 py-8 hidden">
+            <h2 class="text-3xl font-bold flex items-center gap-4 mb-6">
+                <span class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center text-2xl">3</span>
+                簽署確認表 (image004.png)
+            </h2>
+
+            <div id="form-container" class="relative max-w-[820px] mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl">
+                <img id="form-image" src="image004.png" alt="確認表格" class="w-full">
+                
+                <!-- 英文姓名 -->
+                <div class="overlay" style="top: 68%; left: 12%; width: 38%;">
+                    <input id="english-name" type="text" placeholder="English Name (e.g. John Chan)"
+                           class="w-full px-5 py-4 text-lg border-0 focus:outline-none font-medium">
+                </div>
+                
+                <!-- 日期 -->
+                <div class="overlay" style="top: 68%; left: 58%; width: 28%;">
+                    <input id="sign-date" type="text" readonly class="w-full px-5 py-4 text-lg border-0 bg-transparent text-center font-medium">
+                </div>
+                
+                <!-- 電子簽名 -->
+                <div class="overlay" style="top: 78%; left: 12%; width: 48%; padding: 16px;">
+                    <p class="text-sm text-gray-600 mb-3">電子簽名（滑鼠或手指繪寫）</p>
+                    <canvas id="signature-canvas" width="380" height="140" class="rounded-2xl"></canvas>
+                    <div class="flex gap-3 mt-4">
+                        <button onclick="clearSignature()" class="flex-1 bg-gray-200 py-3 rounded-2xl text-sm">清除簽名</button>
+                        <button onclick="undoSignature()" class="flex-1 bg-gray-200 py-3 rounded-2xl text-sm">上一步</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-6 mt-12">
+                <button onclick="prevStep(3)" class="px-10 py-4 border border-gray-300 rounded-2xl">← 上一步</button>
+                <button onclick="generatePDF()" 
+                        class="px-14 py-4 bg-green-600 hover:bg-green-700 text-white text-lg rounded-2xl flex items-center gap-3">
+                    提交並生成 PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 密碼
+        function checkPassword() {
+            if (document.getElementById('password-input').value === 'bgcafanling') {
+                document.getElementById('password-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                goToStep(1);
+            } else {
+                alert('密碼錯誤！請輸入 bgcafanling');
+            }
+        }
+
+        // 步驟切換
+        function goToStep(n) {
+            document.querySelectorAll('#step-1, #step-2, #step-3').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step-${n}`).classList.remove('hidden');
+        }
+        function nextStep(n) { n === 1 ? goToStep(2) : goToStep(3); }
+        function prevStep() { goToStep(2); }
+        function logout() { if(confirm('確定登出？')) location.reload(); }
+
+        // 電子簽名
+        let canvas, ctx, isDrawing = false, lastX, lastY, history = [];
+        function initSignature() {
+            canvas = document.getElementById('signature-canvas');
+            ctx = canvas.getContext('2d');
+            ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#1e40af';
+
+            canvas.addEventListener('mousedown', e => { isDrawing=true; lastX=e.offsetX; lastY=e.offsetY; history.push(ctx.getImageData(0,0,canvas.width,canvas.height)); });
+            canvas.addEventListener('mousemove', e => {
+                if(!isDrawing) return;
+                ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke();
+                lastX = e.offsetX; lastY = e.offsetY;
+            });
+            canvas.addEventListener('mouseup', () => { isDrawing=false; history.push(ctx.getImageData(0,0,canvas.width,canvas.height)); });
+            
+            // 觸控支援
+            canvas.addEventListener('touchstart', e=>{ e.preventDefault(); isDrawing=true; const r=canvas.getBoundingClientRect(); lastX=e.touches[0].clientX-r.left; lastY=e.touches[0].clientY-r.top; });
+            canvas.addEventListener('touchmove', e=>{ e.preventDefault(); if(!isDrawing) return; const r=canvas.getBoundingClientRect(); const x=e.touches[0].clientX-r.left; const y=e.touches[0].clientY-r.top; ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(x,y); ctx.stroke(); lastX=x; lastY=y; });
+        }
+        function clearSignature(){ ctx.clearRect(0,0,canvas.width,canvas.height); history=[]; }
+        function undoSignature(){ if(history.length>1){ history.pop(); ctx.putImageData(history[history.length-1],0,0); } }
+
+        // PDF 生成
+        async function generatePDF() {
+            const name = document.getElementById('english-name').value.trim();
+            if(!name){ alert('請填寫英文姓名'); return; }
+            if(ctx.getImageData(0,0,canvas.width,canvas.height).data.every(v=>v===0)){ alert('請繪寫電子簽名'); return; }
+
+            const container = document.getElementById('form-container');
+            const canvasImg = await html2canvas(container, {scale:2});
+            const imgData = canvasImg.toDataURL('image/png');
+
+            const {jsPDF} = window.jspdf;
+            const pdf = new jsPDF('portrait','mm','a4');
+            const ratio = Math.min(210/canvasImg.width, 297/canvasImg.height);
+            pdf.addImage(imgData, 'PNG', (210 - canvasImg.width*ratio)/2, (297 - canvasImg.height*ratio)/2, canvasImg.width*ratio, canvasImg.height*ratio);
+            
+            pdf.save(`BGCA_確認表_${name.replace(/[^a-zA-Z0-9]/g,'_')}_${document.getElementById('sign-date').value}.pdf`);
+            alert('✅ PDF 已成功下載！');
+        }
+
+        // 日期
+        function setDate() {
+            const d = new Date();
+            document.getElementById('sign-date').value = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+        }
+
+        window.onload = () => {
+            initSignature();
+            setDate();
+        };
+    </script>
 </body>
 </html>
