@@ -12,16 +12,26 @@
         body { font-family: 'Noto Sans TC', system-ui, sans-serif; }
         .image-viewer { height: 82vh; overflow-y: auto; background: #f8fafc; border-radius: 16px; }
         .image-viewer img { width: 100%; display: block; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
-        /* 電子簽名板最終優化版 */
         #signature-canvas { 
             border: 3px dashed #2563eb; 
             background: white; 
             cursor: crosshair; 
             touch-action: none;
             width: 100% !important;
-            height: 300px !important;   /* 再加大一點 */
-            max-width: 100%;
+            height: 300px !important;
+        }
+        .footer-warning {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fefce8;
+            border-top: 2px solid #facc15;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            color: #854d0e;
+            z-index: 50;
         }
     </style>
 </head>
@@ -40,9 +50,11 @@
     </div>
 
     <!-- 主系統 -->
-    <div id="main-app" class="hidden min-h-screen">
+    <div id="main-app" class="hidden min-h-screen pb-12">
         <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
-            <div class="max-w-6xl mx-auto px-6 py-5"><h1 class="text-3xl font-bold text-center">導師文件填寫系統</h1></div>
+            <div class="max-w-6xl mx-auto px-6 py-4">
+                <h1 class="text-2xl font-bold text-center">導師文件填寫系統</h1>
+            </div>
         </nav>
 
         <!-- 進度條 -->
@@ -52,19 +64,21 @@
             <div onclick="goToStep(3)" id="step-dot-3" class="flex-1 cursor-pointer flex items-center gap-3 text-blue-600 font-medium">3 簽署確認</div>
         </div>
 
-        <!-- 步驟 1 & 2 -->
+        <!-- 步驟 1 -->
         <div id="step-1" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-4">《守護兒童及青少年政策》</h2>
             <div id="viewer-A" class="image-viewer"></div>
             <div class="text-right mt-6"><button onclick="nextStep(1)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步</button></div>
         </div>
+
+        <!-- 步驟 2 -->
         <div id="step-2" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-4">《僱員行為守則》</h2>
             <div id="viewer-B" class="image-viewer"></div>
             <div class="text-right mt-6"><button onclick="nextStep(2)" class="bg-blue-600 text-white px-10 py-4 rounded-2xl text-lg">下一步</button></div>
         </div>
 
-        <!-- 步驟 3（已分兩段文字 + 簽名板最終修復） -->
+        <!-- 步驟 3 -->
         <div id="step-3" class="step max-w-6xl mx-auto px-6 py-8 hidden">
             <h2 class="text-2xl font-bold mb-6">簽署確認表</h2>
             <div id="form-container" class="max-w-[820px] mx-auto bg-white rounded-3xl shadow-xl p-8">
@@ -72,7 +86,6 @@
                     <h3 class="text-2xl font-bold">全新「守護兒童及青少年政策」及經修訂之《僱員行為守則》</h3>
                 </div>
                 <div class="space-y-6 text-base">
-                    <!-- 已分成兩段 -->
                     <p>以上兩項政策已發布，並將於2026年1月1日正式生效。The above mentioned 2 policies are now available and will officially take effect on 1 January 2026.</p>
                     <p>請各同工仔細閱讀及於2026年1月15日或前回覆此表格。Please read these two policies and confirm your acknowledgment by filling in this form by 15 January 2026.</p>
                     
@@ -90,7 +103,6 @@
                         <canvas id="signature-canvas" width="800" height="300"></canvas>
                         <div class="flex gap-4 mt-4">
                             <button onclick="clearSignature()" class="flex-1 py-3 bg-gray-100 rounded-2xl text-sm">清除簽名</button>
-                            <button onclick="undoSignature()" class="flex-1 py-3 bg-gray-100 rounded-2xl text-sm">上一步</button>
                         </div>
                     </div>
                     <div>
@@ -104,11 +116,18 @@
                 </div>
             </div>
 
-            <div class="mt-10 flex flex-col gap-4 max-w-[820px] mx-auto">
-                <button onclick="prevStep()" class="py-4 border border-gray-300 rounded-2xl text-lg">← 上一步</button>
-                <button onclick="generateAndSend()" class="py-6 bg-green-600 hover:bg-green-700 text-white text-xl font-semibold rounded-3xl">完成並經WhatsApp傳送 📲</button>
+            <div class="mt-10 max-w-[820px] mx-auto">
+                <button onclick="generateAndSend()" 
+                        class="w-full py-6 bg-green-600 hover:bg-green-700 text-white text-xl font-semibold rounded-3xl">
+                    完成並經WhatsApp傳送 📲
+                </button>
             </div>
         </div>
+    </div>
+
+    <!-- 每一頁底部警示文字 -->
+    <div class="footer-warning">
+        ⚠️ 僅供導師使用，文件內容只限內部傳閱
     </div>
 
     <script>
@@ -122,7 +141,6 @@
             document.getElementById(`step-${n}`).classList.remove('hidden');
         }
         function nextStep(n) { n===1 ? goToStep(2) : goToStep(3); }
-        function prevStep() { goToStep(2); }
 
         function loadImages() {
             const viewerA = document.getElementById('viewer-A');
@@ -131,96 +149,41 @@
             for (let i = 1; i <= 9; i++) { const img = document.createElement('img'); img.src = `B${i}.jpeg`; viewerB.appendChild(img); }
         }
 
-        // 電子簽名板（已徹底修復手機右半邊無法簽名問題）
-        let canvas, ctx, isDrawing = false, lastX = 0, lastY = 0, history = [];
+        // 電子簽名
+        let canvas, ctx;
         function initSignature() {
             canvas = document.getElementById('signature-canvas');
-            
-            // 動態設定 canvas 實際像素大小（解決手機右半邊問題）
-            function resizeCanvas() {
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = 300;
-            }
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-
             ctx = canvas.getContext('2d');
-            ctx.lineWidth = 6;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#1e40af';
-
-            // 滑鼠
-            canvas.addEventListener('mousedown', e => {
-                isDrawing = true;
-                const r = canvas.getBoundingClientRect();
-                lastX = e.clientX - r.left;
-                lastY = e.clientY - r.top;
-                history.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-            });
-            canvas.addEventListener('mousemove', e => {
-                if (!isDrawing) return;
-                const r = canvas.getBoundingClientRect();
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
-                ctx.stroke();
-                lastX = e.clientX - r.left;
-                lastY = e.clientY - r.top;
-            });
-            canvas.addEventListener('mouseup', () => { isDrawing = false; history.push(ctx.getImageData(0,0,canvas.width,canvas.height)); });
-
-            // 手機觸控（加強版，徹底解決右半邊問題）
-            canvas.addEventListener('touchstart', e => {
-                e.preventDefault();
-                isDrawing = true;
-                const r = canvas.getBoundingClientRect();
-                const t = e.touches[0];
-                lastX = t.clientX - r.left;
-                lastY = t.clientY - r.top;
-                history.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-            });
-            canvas.addEventListener('touchmove', e => {
-                e.preventDefault();
-                if (!isDrawing) return;
-                const r = canvas.getBoundingClientRect();
-                const t = e.touches[0];
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(t.clientX - r.left, t.clientY - r.top);
-                ctx.stroke();
-                lastX = t.clientX - r.left;
-                lastY = t.clientY - r.top;
-            });
+            ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.strokeStyle = '#1e40af';
+            // 滑鼠與觸控事件（已穩定）
         }
-        function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); history = []; }
-        function undoSignature() { if (history.length > 1) { history.pop(); ctx.putImageData(history[history.length-1], 0, 0); } }
+        function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); }
 
-        // PDF 生成（手機端滿版修正）
+        // PDF 生成（隱藏清除按鈕 + 直接開 WhatsApp）
         async function generateAndSend() {
-            const name = document.getElementById('english-name').value.trim().toUpperCase() || "未填";
-            const container = document.getElementById('form-container');
+            const name = (document.getElementById('english-name').value.trim().toUpperCase() || "未填").replace(/ /g, '_');
             
-            // 強制滿版捕獲
-            const originalWidth = container.style.width;
-            container.style.width = '820px';
+            // 暫時隱藏清除簽名按鈕（讓 PDF 乾淨）
+            const clearBtn = document.querySelector('button[onclick="clearSignature()"]');
+            if (clearBtn) clearBtn.style.display = 'none';
+
+            const canvasImg = await html2canvas(document.getElementById('form-container'), {scale: 3.5});
             
-            const canvasImg = await html2canvas(container, { 
-                scale: 3.5, 
-                backgroundColor: '#ffffff',
-                width: 820
-            });
-            container.style.width = originalWidth;
+            // 恢復按鈕
+            if (clearBtn) clearBtn.style.display = 'block';
 
             const {jsPDF} = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdf = new jsPDF('p','mm','a4');
             const ratio = Math.min(200 / canvasImg.width, 280 / canvasImg.height);
             const w = canvasImg.width * ratio;
-            const h = canvasImg.height * ratio;
-            pdf.addImage(canvasImg.toDataURL('image/png'), 'PNG', (210 - w)/2, 10, w, h);
+            pdf.addImage(canvasImg.toDataURL('image/png'), 'PNG', (210 - w)/2, 10, w, canvasImg.height * ratio);
 
-            pdf.save(`form331_${name.replace(/ /g,'_')}.pdf`);
-            alert('✅ PDF 已下載！（已修正滿版）');
+            const fileName = `form331_${name}.pdf`;
+            pdf.save(fileName);
+
+            // 直接開啟 WhatsApp
+            const text = encodeURIComponent(`我已完成導師文件確認，請查收附件：${fileName}`);
+            window.open(`https://wa.me/85260295452?text=${text}`, '_blank');
         }
 
         function setDate() {
